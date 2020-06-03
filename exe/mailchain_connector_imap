@@ -1,0 +1,3 @@
+#!/usr/bin/env ruby
+
+require "mailchain_connector_imap"
