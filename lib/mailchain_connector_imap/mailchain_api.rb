@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'HTTParty'
-require 'pry'
+
 class MailchainApi
   include HTTParty
   @config = {}

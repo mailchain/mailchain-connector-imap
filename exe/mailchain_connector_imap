@@ -3,4 +3,5 @@
 
 require File.absolute_path('../lib/mailchain_connector_imap', __dir__)
 
-MailchainConnectorImap::Connector.new
+connector = MailchainConnectorImap::Connector.new
+connector.start

@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'net/imap'
-require 'pry'
 require 'mail'
 require 'pstore'
 
