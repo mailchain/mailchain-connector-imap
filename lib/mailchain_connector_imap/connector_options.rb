@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class ConnectorOptions
-  CONFIG_FILE = 'config.json'
-  LOG_FILE = 'mailchain_connector_log.txt'
+  STORE_PATH = "#{ENV['HOME']}/.mailchain_connector/imap/"
+  CONFIG_FILE = File.join(STORE_PATH, 'config.json')
+  LOG_FILE = File.join(STORE_PATH, 'mailchain_connector_imap.log')
   attr_reader :imap_conn
   attr_reader :mailchain_conn
   attr_reader :config
@@ -16,7 +17,7 @@ class ConnectorOptions
   # Handle missing config file error
   def missing_config_file
     puts "Invalid or missing config.\n" \
-      'Run `mailchain_connector --configure` or mailchain_connector --help` for more options.'
+      'Run `mailchain_connector_imap --configure`'
   end
 
   # Run the script and parse input arguments
@@ -24,7 +25,7 @@ class ConnectorOptions
     OptionParser.new do |opts|
       ARGV << '-r' if ARGV.empty?
 
-      opts.banner = 'Usage: mailchain_connector.rb [options]'
+      opts.banner = 'Usage: mailchain_connector_imap [options]'
 
       opts.on('-r', '--run', 'Run and sync messages') do
         unless valid_config
@@ -98,6 +99,7 @@ class ConnectorOptions
 
   # Check for an existing config file, otherwise create a new one with minimum requirements to be parsed.
   def check_or_create_config_file
+    (FileUtils.mkdir_p(STORE_PATH) unless File.exist?(CONFIG_FILE))
     File.write(CONFIG_FILE, '{}') unless File.exist?(CONFIG_FILE)
   end
 

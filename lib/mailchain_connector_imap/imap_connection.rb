@@ -6,8 +6,8 @@ require 'pstore'
 
 # Handles the Imap configuration and connection
 class ImapConnection
-  STORE_PATH = "#{ENV['HOME']}/.mailchain_connector/"
-  STORE_FILE = File.join(STORE_PATH, 'mailchain_connector.pstore')
+  STORE_PATH = "#{ENV['HOME']}/.mailchain_connector/imap/"
+  STORE_FILE = File.join(STORE_PATH, 'mailchain_connector_imap.pstore')
 
   # reads the config file and sets `@config`
   def initialize(config, config_file)
@@ -36,7 +36,7 @@ class ImapConnection
     message_id_hash = Digest::MD5.hexdigest(message_id)
     @pstore.transaction { @pstore['append_' + message_id_hash] } == true
   end
-  
+
   # Creates a pretty output for settings
   def pretty_settings(options)
     "IMAP Settings:\n" \

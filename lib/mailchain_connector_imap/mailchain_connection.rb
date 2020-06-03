@@ -279,7 +279,7 @@ class MailchainConnection
     "API URL:\t#{ssl}://#{hostname}:#{port}/api\n" \
     "Mainnet messages: #{mainnet_inbox}\n" \
     "Store messages: #{FOLDER_STRUCTURE[folders]}\n" \
-    "Polling interval: #{interval} seconds #{(interval / 60).to_s + ' minutes' if interval > 60}"
+    "Polling interval: #{interval} seconds #{'(' + (interval / 60).to_s + ' minutes)' if interval > 60}"
   end
 
   # Prints the Mailchain API settings as output in a nice format
