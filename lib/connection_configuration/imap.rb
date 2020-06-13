@@ -16,7 +16,6 @@ class ConnectionConfigurationImap
 
     prompt_server
     prompt_username
-    prompt_password
     prompt_port
     prompt_ssl
 
@@ -49,15 +48,7 @@ class ConnectionConfigurationImap
       'Enter your imap username/ email address (e.g. tim@example.com)',
       default: @config['imap']['username']
     )
-end
-
-  # Get imap password
-  def prompt_password
-    @config['imap']['password'] = @prompt.mask(
-      'Enter your imap password',
-      default: @config['imap']['password']
-    )
-end
+  end
 
   # Get imap port
   def prompt_port
@@ -66,7 +57,7 @@ end
       'Enter the imap port to connect to (e.g. IMAP = 143; IMAP SSL = 993)',
       default: @config['imap']['port']
     )
-end
+  end
 
   # Get imap ssl status
   def prompt_ssl
@@ -78,7 +69,7 @@ end
       menu.choice 'No', 2
     end
     @config['imap']['ssl'] = imap_ssl_val == 1
-end
+  end
 
   # Confirm settings with user
   def prompt_confirm_save_settings

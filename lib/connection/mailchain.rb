@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 require_relative '../api/mailchain'
-require_relative '../connection/imap' # TODO: remove this from this file (see messages_by_network below)
 require_relative '../connection/mailchain'
 require 'mail'
-require 'pry'
 # Handles the Mailchain API configuration and connection
 class ConnectionMailchain
   # Initialize configs
@@ -28,21 +26,25 @@ class ConnectionMailchain
     connection_configuration = ConnectionConfigurationMailchain.new(@config)
     result = connection_configuration.configuration_wizard
     if result['save']
+      result['config']['imap']['password'] = nil
       new_config_json = JSON.pretty_generate(result['config'])
       File.write(@config_file, new_config_json)
     end
   end
 
   # Tests the connection to the Mailchain API
-  def test_connection
-    puts 'Testing API connection...'
+  def test_connection(silent = false)
+    puts 'Testing API connection...' unless silent
+    res = true
     begin
       res = @api.version
-      puts "Connection was successful (API version: #{res[:body]['version']})" if res[:status_code] == 200
+      puts "Connection was successful (API version: #{res[:body]['version']})" unless silent || res[:status_code] != 200
     rescue StandardError => e
-      puts "API failed to connect with the following error: #{e}"
+      puts "Mailchain API failed to connect with the following error: #{e}"
+      puts 'Check the Mailchain client is running and configured correctly'
+      res = false
     end
-    true
+    res
   end
 
   # Converts mailchain message to regular email

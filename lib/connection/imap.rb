@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 require 'net/imap'
-require 'mail'
-require 'pry'
 require 'pstore'
 require_relative '../connection_configuration/imap'
 
@@ -44,27 +42,41 @@ class ConnectionImap
     connection_configuration = ConnectionConfigurationImap.new(@config)
     result = connection_configuration.configuration_wizard
     if result['save']
+      result['config']['imap']['password'] = nil
       new_config_json = JSON.pretty_generate(result['config'])
       File.write(@config_file, new_config_json)
     end
   end
 
   # Connect to the IMAP server, attempting 'LOGIN' then 'PLAIN'
-  def connect(password = @config['imap']['password'])
+  def connect
+    check_password
     @connection ||= Net::IMAP.new(@config['imap']['server'], @config['imap']['port'], @config['imap']['ssl'])
-    if @connection.disconnected?
-      begin
-        @connection.authenticate('LOGIN', @config['imap']['username'], password)
-      rescue StandardError
-        begin
-          @connection.authenticate('PLAIN', @config['imap']['username'], password)
-        rescue StandardError => e
-          puts "IMAP failed to connect: #{e}"
-        end
-      end
+    if connected_and_authenticated?
       true
     else
-      true
+      res = true
+      begin
+         @connection.authenticate('LOGIN', @config['imap']['username'], @config['imap']['password'])
+      rescue StandardError
+        begin
+          @connection.authenticate('PLAIN', @config['imap']['username'], @config['imap']['password'])
+        rescue StandardError => e
+          puts "IMAP failed to connect: #{e}"
+          res = false
+        end
+       end
+      res
+    end
+  end
+
+  def check_password
+    unless @config['imap']['password']
+      # Get imap password
+      prompt = TTY::Prompt.new
+      @config['imap']['password'] = prompt.mask(
+        'Enter your imap password', required: true
+      )
     end
   end
 
@@ -156,5 +168,12 @@ class ConnectionImap
     folders = @connection.list('', '*')
     folders
     disconnect
+  end
+
+  # Attempts to list mailboxes (folders). If length > 0, then wemust be authenticated
+  def connected_and_authenticated?
+    !@connection.disconnected? && !@connection.list('', '*').empty?
+  rescue StandardError => e
+    false
   end
 end

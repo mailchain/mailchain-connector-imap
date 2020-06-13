@@ -2,7 +2,6 @@
 
 require 'tty-prompt'
 require 'optparse'
-require 'pry'
 
 require_relative 'connection/imap'
 require_relative 'connection/mailchain'
@@ -21,8 +20,7 @@ module MailchainConnectorImap
     attr_reader :config
 
     def initialize
-      password = prompt_password
-      parse_config_file(password)
+      parse_config_file
       @imap_conn = ConnectionImap.new(@config, CONFIG_FILE)
       @mailchain_conn = ConnectionMailchain.new(@config, CONFIG_FILE)
       @config_json = {}
@@ -31,14 +29,6 @@ module MailchainConnectorImap
     def start
       # Run OptionsParser to interpret user input
       run_options_parse
-    end
-
-    # Get password to decrypt stored IMAP password
-    def prompt_password
-      prompt = TTY::Prompt.new
-      prompt.mask(
-        'Enter password used to encrypt config:'
-      )
     end
 
     # Handle missing config file error
@@ -115,7 +105,7 @@ module MailchainConnectorImap
     end
 
     # Parse the config file as JSON
-    def parse_config_file(_password)
+    def parse_config_file
       check_or_create_config_file
       config_json = File.read(CONFIG_FILE)
       @config = JSON.parse(config_json)
@@ -129,33 +119,41 @@ module MailchainConnectorImap
     # Check for an existing config file, otherwise create a new one with minimum requirements to be parsed.
     def check_or_create_config_file
       (FileUtils.mkdir_p(STORE_PATH) unless File.exist?(CONFIG_FILE))
-      File.write(CONFIG_FILE, '{"imap": {}, "mailchain": {}, "cipher": {} }') unless File.exist?(CONFIG_FILE)
+      File.write(CONFIG_FILE, '{"imap": {}, "mailchain": {}}') unless File.exist?(CONFIG_FILE)
     end
 
     # sync_messages calls ConnectionMailchain.messages_by_network, before setting a timer to run again.
     # Minimum timer interval is 60 seconds.
     # It logs at the beginning and end of each polling interval.
     def sync_messages
-      loop do
-        interval = @config['mailchain']['interval'].to_i > 60 ? @config['mailchain']['interval'].to_i : 60
-        log_to_file('Checking messages')
-        @mailchain_conn.addresses_by_network.each do |abn|
-          protocol = abn['protocol']
-          network = abn['network']
-          # TODO: - Simplify this:
-          addr_with_messages = @mailchain_conn.messages_by_network(abn)
-          addr_with_messages.each do |addr_msg|
-            addr = addr_msg[0]
-            msg = addr_msg[1]
-            converted_messages = @mailchain_conn.convert_messages(msg)
-            converted_messages.each do |cm|
-              @imap_conn.append_message(protocol, network, addr, cm['message'], cm['message_id'], nil, cm['message_date'])
+      if @imap_conn.connect
+        puts 'Connected to IMAP'
+        if mailchain_conn.test_connection(true)
+          puts 'Connected to Mailchain client'
+          loop do
+            if @imap_conn.connect && mailchain_conn.test_connection(true)
+              interval = @config['mailchain']['interval'].to_i > 60 ? @config['mailchain']['interval'].to_i : 60
+              log_to_file('Checking messages')
+              @mailchain_conn.addresses_by_network.each do |abn|
+                protocol = abn['protocol']
+                network = abn['network']
+                # TODO: - Simplify this:
+                addr_with_messages = @mailchain_conn.messages_by_network(abn)
+                addr_with_messages.each do |addr_msg|
+                  addr = addr_msg[0]
+                  msg = addr_msg[1]
+                  converted_messages = @mailchain_conn.convert_messages(msg)
+                  converted_messages.each do |cm|
+                    @imap_conn.append_message(protocol, network, addr, cm['message'], cm['message_id'], nil, cm['message_date'])
+                  end
+                end
+              end
             end
+
+            log_to_file('Done')
+            sleep interval
           end
         end
-
-        log_to_file('Done')
-        sleep interval
       end
     rescue StandardError => e
       log_to_file("Error: #{e}")
@@ -168,7 +166,6 @@ module MailchainConnectorImap
       [
         @config['imap']['server'],
         @config['imap']['username'],
-        @config['imap']['password'],
         @config['imap']['port'],
         @config['imap']['ssl'],
         @config['mailchain']['hostname'],
