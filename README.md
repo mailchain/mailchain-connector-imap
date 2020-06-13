@@ -1,28 +1,46 @@
 # MailchainConnectorImap
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/mailchain_connector_imap`. To experiment with that code, run `bin/console` for an interactive prompt.
+The Mailchain Connector for IMAP makes it possible to receive Mailchain messages in your email inbox (i.e. your webmail, desktop or phone mail application).
 
-TODO: Delete this and the text above, and describe your gem
+It connects to the Mailchain API, converts messages to emails, then uploads them to your chosen IMAP mailbox.
+
+**NOTE: Further documentation can be found here: https://docs.mailchain.xyz/mailchain-connectors/mailchain-connector-imap**
+
+## Prerequisites
+
+You need to have installed:
+1. Ruby
+1. The Mailchain API client (https://docs.mailchain.xyz/installation)
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Install by running:
 
-```ruby
-gem 'mailchain_connector_imap'
+```sh
+  gem install mailchain_connector_imap
 ```
-
-And then execute:
-
-    $ bundle install
-
-Or install it yourself as:
-
-    $ gem install mailchain_connector_imap
 
 ## Usage
 
-TODO: Write usage instructions here
+### Getting Started & Configuration
+
+When running mailchain_connector_imap for the first time, or to change the configuration, run:
+
+```sh
+  mailchain_connector_imap --configure
+```
+
+This will walk you through the configuration options.
+
+NOTE: See [Mailchain Docs](https://docs.mailchain.xyz/mailchain-connectors/mailchain-connector-imap) for further information.
+
+### Running the Mailchain Connector for IMAP
+
+To run the connector, once you have run the configuration:
+
+```sh
+  mailchain_connector_imap
+```
 
 ## Development
 
@@ -32,9 +50,8 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/mailchain_connector_imap. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/mailchain_connector_imap/blob/master/CODE_OF_CONDUCT.md).
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/mailchain/mailchain_connector_imap. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/mailchain/community/blob/master/code-of-conduct.md).
 
 ## Code of Conduct
 
-Everyone interacting in the MailchainConnectorImap project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/mailchain_connector_imap/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the MailchainConnectorImap project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/mailchain/community/blob/master/code-of-conduct.md).

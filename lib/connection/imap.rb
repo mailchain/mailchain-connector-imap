@@ -2,10 +2,12 @@
 
 require 'net/imap'
 require 'mail'
+require 'pry'
 require 'pstore'
+require_relative '../connection_configuration/imap'
 
 # Handles the Imap configuration and connection
-class ImapConnection
+class ConnectionImap
   STORE_PATH = "#{ENV['HOME']}/.mailchain_connector/imap/"
   STORE_FILE = File.join(STORE_PATH, 'mailchain_connector_imap.pstore')
 
@@ -37,98 +39,33 @@ class ImapConnection
     @pstore.transaction { @pstore['append_' + message_id_hash] } == true
   end
 
-  # Creates a pretty output for settings
-  def pretty_settings(options)
-    "IMAP Settings:\n" \
-           "--------------\n" \
-           "Server:\t\t#{options['imap_server']}\n" \
-           "Port:\t\t#{options['imap_port']}\n" \
-           "SSL:\t\t#{options['imap_ssl']}\n" \
-           "Username:\t#{options['imap_username']}"
-  end
-
-  # Prints the IMAP server settings as output in a nice format
-  def print_settings(options)
-    puts pretty_settings(options)
-  end
-
-  # Run the IMAP configuration
-  def configure_server
-    prompt = TTY::Prompt.new
-    result = false
-
-    # Get imap server config
-    @config['imap_server'] = prompt.ask(
-      'Enter your imap server (e.g. imap.example.com)',
-      default: @config['imap_server']
-    )
-
-    # Get imap username
-    @config['imap_username'] = prompt.ask(
-      'Enter your imap username/ email address (e.g. tim@example.com)',
-      default: @config['imap_username']
-    )
-
-    # Get imap password
-    @config['imap_password'] = prompt.mask(
-      'Enter your imap password',
-      default: @config['imap_password']
-    )
-
-    # Get imap port
-    @config['imap_port'] = @config['imap_port'] || '993'
-    @config['imap_port'] = prompt.ask(
-      'Enter the imap port to connect to (e.g. IMAP = 143; IMAP SSL = 993)',
-      default: @config['imap_port']
-    )
-
-    # Get imap ssl status
-    @config['imap_ssl'] = @config['imap_ssl'] != false
-    imap_ssl_val = @config['imap_ssl'] ? 1 : 2
-    imap_ssl_val = prompt.select('Use SSL?', cycle: true) do |menu|
-      menu.default imap_ssl_val
-      menu.choice 'Yes', 1
-      menu.choice 'No', 2
+  # # Run the IMAP configuration
+  def configuration_wizard
+    connection_configuration = ConnectionConfigurationImap.new(@config)
+    result = connection_configuration.configuration_wizard
+    if result['save']
+      new_config_json = JSON.pretty_generate(result['config'])
+      File.write(@config_file, new_config_json)
     end
-    @config['imap_ssl'] = imap_ssl_val == 1
-
-    # Confirm settings with user
-    server_settings = pretty_settings(@config)
-    imap_confirm_val = prompt.select(
-      "Would you like to save the following settings?\n" \
-      "NOTE: Any existing configuration will be overwritten\n\n" \
-      "#{server_settings}",
-      cycle: true
-    ) do |menu|
-      menu.choice 'Save', true
-      menu.choice 'Cancel', false
-    end
-    if imap_confirm_val
-      new_options_json = JSON.pretty_generate(@config)
-      File.write(@config_file, new_options_json)
-      result = true
-    else
-      # Exit the application
-      result = false
-    end
-
-    result
   end
 
   # Connect to the IMAP server, attempting 'LOGIN' then 'PLAIN'
-  def connect
-    @connection = Net::IMAP.new(@config['imap_server'], @config['imap_port'], @config['imap_ssl'])
-
-    begin
-      @connection.authenticate('LOGIN', @config['imap_username'], @config['imap_password'])
-    rescue StandardError
+  def connect(password = @config['imap']['password'])
+    @connection ||= Net::IMAP.new(@config['imap']['server'], @config['imap']['port'], @config['imap']['ssl'])
+    if @connection.disconnected?
       begin
-        @connection.authenticate('PLAIN', @config['imap_username'], @config['imap_password'])
-      rescue StandardError => e
-        puts "IMAP failed to connect: #{e}"
+        @connection.authenticate('LOGIN', @config['imap']['username'], password)
+      rescue StandardError
+        begin
+          @connection.authenticate('PLAIN', @config['imap']['username'], password)
+        rescue StandardError => e
+          puts "IMAP failed to connect: #{e}"
+        end
       end
+      true
+    else
+      true
     end
-    true
   end
 
   # Sets the connection delimiter
@@ -147,7 +84,7 @@ class ImapConnection
 
   # Configures the IMAP server settings then tests the connection
   def configure_and_connect
-    if !configure_server
+    if !configuration_wizard # TODO: - wire up to connection configuration
       exit
     else
       test_connection
@@ -197,10 +134,7 @@ class ImapConnection
   #  if the connection is not defined/ connected already
   def append_message(protocol, network, address, message, message_id, flags = nil, date_time = nil)
     unless msg_appended?(message_id)
-      if @connection.nil? || @connection.disconnected?
-        connect
-        local_connection = true
-      end
+      connect
 
       target_mailbox = get_mailbox(protocol, address, network)
       create_mailbox_path(target_mailbox)
@@ -210,8 +144,6 @@ class ImapConnection
         @connection.append(target_mailbox, message.to_s, flags, date_time)
       end
       store_msg_appended(message_id)
-
-      disconnect if local_connection
     end
   end
 
@@ -219,12 +151,10 @@ class ImapConnection
   # Connects and disconnects at the beginning and end of the method
   #  if the connection is not defined/ connected already
   def list_folders
-    if @connection.nil? || @connection.disconnected?
-      connect
-      local_connection = true
-    end
+    connect
+
     folders = @connection.list('', '*')
-    disconnect if local_connection
     folders
+    disconnect
   end
 end

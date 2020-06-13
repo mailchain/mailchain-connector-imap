@@ -13,9 +13,9 @@ class MailchainApi
 
   # Return the base_uri as specified in the config
   def base_uri
-    ssl = @config['mailchain_ssl'] ? 'https' : 'http'
-    uri = @config['mailchain_hostname']
-    port = @config['mailchain_port']
+    ssl = @config['ssl'] ? 'https' : 'http'
+    uri = @config['hostname']
+    port = @config['port']
     "#{ssl}://#{uri}:#{port}/api"
   end
 
