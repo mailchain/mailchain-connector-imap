@@ -49,8 +49,7 @@ class ConnectionConfigurationMailchain
   def prompt_hostname
     @config['mailchain']['hostname'] = @prompt.ask(
       'Enter your Mailchain client hostname (e.g. 127.0.0.1 or mailchain.example.com)',
-      default: @config['mailchain']['hostname'] || '127.0.0.1',
-      require: true
+      default: @config['mailchain']['hostname'] || '127.0.0.1'
     )
   end
 
@@ -78,8 +77,7 @@ class ConnectionConfigurationMailchain
       @config['mailchain']['port'] = @config['mailchain']['port'] || '8080'
       @config['mailchain']['port'] = @prompt.ask(
         'Enter the port to connect to the Mailchain client (e.g. 8080)',
-        default: @config['mailchain']['port'],
-        require: true
+        default: @config['mailchain']['port']
       )
     end
   end
@@ -120,8 +118,7 @@ class ConnectionConfigurationMailchain
     @config['mailchain']['interval'] = @config['mailchain']['interval'] || '300'
     @config['mailchain']['interval'] = @prompt.ask(
       'How often would you like to check for messages (in seconds)? (e.g. 300 = 5 minutes; Minimum interval is 1 minute)',
-      default: @config['mailchain']['interval'],
-      require: true
+      default: @config['mailchain']['interval']
     )
   end
 
