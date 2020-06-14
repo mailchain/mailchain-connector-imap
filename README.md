@@ -4,13 +4,14 @@ The Mailchain Connector for IMAP makes it possible to receive Mailchain messages
 
 It connects to the Mailchain API, converts messages to emails, then uploads them to your chosen IMAP mailbox.
 
-**NOTE: Further documentation can be found here: https://docs.mailchain.xyz/mailchain-connectors/mailchain-connector-imap**
+**NOTE: Further documentation can be found here: <https://docs.mailchain.xyz/mailchain-connectors/mailchain-connector-imap>**
 
 ## Prerequisites
 
 You need to have installed:
+
 1. Ruby
-1. The Mailchain API client (https://docs.mailchain.xyz/installation)
+1. The Mailchain API client (<https://docs.mailchain.xyz/installation>)
 
 ## Installation
 
@@ -50,7 +51,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/mailchain/mailchain_connector_imap. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/mailchain/community/blob/master/code-of-conduct.md).
+Bug reports and pull requests are welcome on GitHub at <https://github.com/mailchain/mailchain_connector_imap>. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/mailchain/community/blob/master/code-of-conduct.md).
 
 ## Code of Conduct
 
