@@ -26,7 +26,7 @@ class ConnectionMailchain
     connection_configuration = ConnectionConfigurationMailchain.new(@config)
     result = connection_configuration.configuration_wizard
     if result['save']
-      result['config']['imap']['password'] = nil
+      result['config']['imap'].delete('password')
       new_config_json = JSON.pretty_generate(result['config'])
       File.write(@config_file, new_config_json)
     end
