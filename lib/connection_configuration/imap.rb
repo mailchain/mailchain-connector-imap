@@ -39,7 +39,7 @@ class ConnectionConfigurationImap
     @config['imap']['server'] = @prompt.ask(
       'Enter your imap server (e.g. imap.example.com)',
       default: @config['imap']['server'],
-      required: true
+      require: true
     )
   end
 
@@ -48,7 +48,7 @@ class ConnectionConfigurationImap
     @config['imap']['username'] = @prompt.ask(
       'Enter your imap username/ email address (e.g. tim@example.com)',
       default: @config['imap']['username'],
-      required: true
+      require: true
     )
   end
 
@@ -58,7 +58,7 @@ class ConnectionConfigurationImap
     @config['imap']['port'] = @prompt.ask(
       'Enter the imap port to connect to (e.g. IMAP = 143; IMAP SSL = 993)',
       default: @config['imap']['port'],
-      required: true
+      require: true
     )
   end
 
