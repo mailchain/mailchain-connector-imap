@@ -11,6 +11,7 @@ source 'https://rubygems.org' do
   gem 'bundle'
   gem 'httparty'
   gem 'mail'
+  gem 'rake'
   gem 'tty-prompt'
 
   group :test, :development do
