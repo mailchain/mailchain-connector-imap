@@ -26,4 +26,13 @@ Gem::Specification.new do |spec|
   spec.bindir        = 'exe'
   spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
   spec.require_paths = ['lib']
+
+  spec.add_development_dependency 'bundle', '~> 2.0'
+  spec.add_development_dependency 'pry', '~> 0.13'
+  spec.add_development_dependency 'rake', '~> 12.0'
+  spec.add_development_dependency 'rspec', '~> 3.0'
+
+  spec.add_runtime_dependency 'httparty', '~> 0.18', '>= 0.18.0'
+  spec.add_runtime_dependency 'mail', '~> 2.7', '>= 2.7.1'
+  spec.add_runtime_dependency 'tty-prompt', '~> 0.21', '>= 0.21.0'
 end
