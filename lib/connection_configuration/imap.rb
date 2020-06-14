@@ -38,7 +38,8 @@ class ConnectionConfigurationImap
   def prompt_server
     @config['imap']['server'] = @prompt.ask(
       'Enter your imap server (e.g. imap.example.com)',
-      default: @config['imap']['server']
+      default: @config['imap']['server'],
+      required: true
     )
   end
 
@@ -46,7 +47,8 @@ class ConnectionConfigurationImap
   def prompt_username
     @config['imap']['username'] = @prompt.ask(
       'Enter your imap username/ email address (e.g. tim@example.com)',
-      default: @config['imap']['username']
+      default: @config['imap']['username'],
+      required: true
     )
   end
 
@@ -55,7 +57,8 @@ class ConnectionConfigurationImap
     @config['imap']['port'] = @config['imap']['port'] || '993'
     @config['imap']['port'] = @prompt.ask(
       'Enter the imap port to connect to (e.g. IMAP = 143; IMAP SSL = 993)',
-      default: @config['imap']['port']
+      default: @config['imap']['port'],
+      required: true
     )
   end
 
@@ -73,16 +76,16 @@ class ConnectionConfigurationImap
 
   # Confirm settings with user
   def prompt_confirm_save_settings
-    server_settings =
-      imap_confirm_val = @prompt.select(
-        "Would you like to save the following settings?\n" \
-        "NOTE: Any existing configuration will be overwritten\n\n" \
-        "#{server_settings}",
-        cycle: true
-      ) do |menu|
-        menu.choice 'Save', true
-        menu.choice 'Cancel', false
-      end
+    server_settings = print_settings
+    imap_confirm_val = @prompt.select(
+      "Would you like to save the following settings?\n" \
+      "NOTE: Any existing configuration will be overwritten\n\n" \
+      "#{server_settings}",
+      cycle: true
+    ) do |menu|
+      menu.choice 'Save', true
+      menu.choice 'Cancel', false
+    end
 
     imap_confirm_val ? { 'save' => true, 'config' => @config } : { 'save' => false }
   end
