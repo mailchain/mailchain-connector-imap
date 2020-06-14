@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'HTTParty'
+require 'httparty'
 
 class MailchainApi
   include HTTParty

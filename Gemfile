@@ -1,13 +1,14 @@
-source "https://rubygems.org"
+# frozen_string_literal: true
+
+source 'https://rubygems.org'
 
 # Specify your gem's dependencies in mailchain_connector_imap.gemspec
 gemspec
 
-
 # frozen_string_literal: true
 
 source 'https://rubygems.org' do
-  gem 'bundle'
+  gem 'bundler'
   gem 'httparty'
   gem 'mail'
   gem 'tty-prompt'
