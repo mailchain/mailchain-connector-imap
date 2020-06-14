@@ -128,10 +128,10 @@ module MailchainConnectorImap
     def sync_messages
       if @imap_conn.connect
         puts 'Connected to IMAP'
-        if mailchain_conn.test_connection(true)
+        if @mailchain_conn.test_connection(true)
           puts 'Connected to Mailchain client'
           loop do
-            if @imap_conn.connect && mailchain_conn.test_connection(true)
+            if @imap_conn.connect && @mailchain_conn.test_connection(true)
               interval = @config['mailchain']['interval'].to_i > 60 ? @config['mailchain']['interval'].to_i : 60
               log_to_file('Checking messages')
               @mailchain_conn.addresses_by_network.each do |abn|

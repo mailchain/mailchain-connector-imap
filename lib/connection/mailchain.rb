@@ -35,16 +35,17 @@ class ConnectionMailchain
   # Tests the connection to the Mailchain API
   def test_connection(silent = false)
     puts 'Testing API connection...' unless silent
-    res = true
+    result = true
     begin
       res = @api.version
-      puts "Connection was successful (API version: #{res[:body]['version']})" unless silent || res[:status_code] != 200
+      res[:status_code] != 200
+      puts "Connection was successful (API version: #{res[:body]['version']})" unless silent
     rescue StandardError => e
       puts "Mailchain API failed to connect with the following error: #{e}"
       puts 'Check the Mailchain client is running and configured correctly'
-      res = false
+      result = false
     end
-    res
+    result
   end
 
   # Converts mailchain message to regular email

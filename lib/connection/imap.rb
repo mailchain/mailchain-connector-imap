@@ -52,12 +52,10 @@ class ConnectionImap
   def connect
     check_password
     @connection ||= Net::IMAP.new(@config['imap']['server'], @config['imap']['port'], @config['imap']['ssl'])
-    if connected_and_authenticated?
-      true
-    else
-      res = true
+    res = true
+    unless connected_and_authenticated?
       begin
-         @connection.authenticate('LOGIN', @config['imap']['username'], @config['imap']['password'])
+        @connection.authenticate('LOGIN', @config['imap']['username'], @config['imap']['password'])
       rescue StandardError
         begin
           @connection.authenticate('PLAIN', @config['imap']['username'], @config['imap']['password'])
@@ -65,9 +63,9 @@ class ConnectionImap
           puts "IMAP failed to connect: #{e}"
           res = false
         end
-       end
-      res
+      end
     end
+    res
   end
 
   def check_password
@@ -92,6 +90,7 @@ class ConnectionImap
   # Disconnects from the server
   def disconnect
     @connection.disconnect unless @connection.nil? || @connection.disconnected?
+    @connection = nil
   end
 
   # Configures the IMAP server settings then tests the connection
@@ -113,16 +112,23 @@ class ConnectionImap
 
   # Returns the target mailbox for the message according to the folder structre and Inbox preferences
   def get_mailbox(protocol, address, network)
-    if @config['mailchain_mainnet_to_inbox'] && network.downcase == 'mainnet'
+    p_address = case protocol
+                when 'ethereum'
+                  "0x#{address}"
+                else
+                  address
+                end
+
+    if @config['mailchain']['mainnet_to_inbox'] && network.downcase == 'mainnet'
       'Inbox'
     else
-      case @config['mailchain_folders']
+      case @config['mailchain']['folders']
       when 'by_address'
         # 'Address>Protocol>Network'
-        "Inbox#{delimiter}#{address}#{delimiter}#{protocol}#{delimiter}#{network}"
+        "Inbox#{delimiter}#{p_address}#{delimiter}#{protocol}#{delimiter}#{network}"
       when 'by_network'
         # 'Protocol>Network>Address'
-        "Inbox#{delimiter}#{protocol}#{delimiter}#{network}#{delimiter}#{address}"
+        "Inbox#{delimiter}#{protocol}#{delimiter}#{network}#{delimiter}#{p_address}"
       end
     end
   end
@@ -146,7 +152,7 @@ class ConnectionImap
   #  if the connection is not defined/ connected already
   def append_message(protocol, network, address, message, message_id, flags = nil, date_time = nil)
     unless msg_appended?(message_id)
-      connect
+      connect unless connected_and_authenticated?
 
       target_mailbox = get_mailbox(protocol, address, network)
       create_mailbox_path(target_mailbox)
@@ -160,14 +166,9 @@ class ConnectionImap
   end
 
   # Lists folders
-  # Connects and disconnects at the beginning and end of the method
-  #  if the connection is not defined/ connected already
   def list_folders
     connect
-
-    folders = @connection.list('', '*')
-    folders
-    disconnect
+    @connection.list('', '*')
   end
 
   # Attempts to list mailboxes (folders). If length > 0, then wemust be authenticated
