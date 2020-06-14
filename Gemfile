@@ -4,3 +4,16 @@ source "https://rubygems.org"
 gemspec
 
 
+# frozen_string_literal: true
+
+source 'https://rubygems.org' do
+  gem 'bundle'
+  gem 'httparty'
+  gem 'mail'
+  gem 'tty-prompt'
+
+  group :test, :development do
+    gem 'pry'
+    gem 'rspec'
+  end
+end
