@@ -115,15 +115,16 @@ class ConnectionMailchain
     addresses = item['addresses']
     messages = []
     addresses.each do |address|
-      res = get_messages(address, protocol, network)
-      messages << [address, res['messages']] unless res['messages'].nil?
+      address_val = address["value"]
+      res = get_messages(address_val, protocol, network)
+      messages << [address_val, res['messages']] unless res['messages'].nil?
     end
     messages
   end
 
   # Gets messages from api and returns `body` {"messages" => [...]}
   def get_messages(addr, protocol, network)
-    address = "0x#{addr}"
+    address = "#{addr}"
     @api.messages(address, protocol, network)[:body]
   end
 
